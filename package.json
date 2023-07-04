@@ -1,18 +1,14 @@
 {
-    "name": "sturdy-octo-computing-machine",
-    "version": "1.0.0",
-    "description": "",
-    "scripts": {
-        "start": "node index.js"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/cleargreentrees/sturdy-octo-computing-machine.git"
-    },
-    "author": "",
-    "license": "ISC",
-  "bugs": {
-       "url": "https://github.com/cleargreentrees/sturdy-octo-computing-machine/issues"
-    },
-    "homepage": "https://github.com/cleargreentrees/sturdy-octo-computing-machine#readme"
+  "name": "sturdy-octo-computing-machine",
+  "version": "1.0.0",
+  "description": "An example of using poe-node-api to create a web server",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-rate-limit": "^5.5.1",
+    "poe-node-api": "^1.0.3"
+  }
 }
