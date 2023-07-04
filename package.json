@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "An example of using poe-node-api to create a web server",
   "main": "index.js",
+  "engines": {
+  "node": "16.x"
+},
   "scripts": {
   "build": "npm install --production",
   "start": "node index.js",
