@@ -1,79 +1,67 @@
-// Import modules
-import express from "express";
-import {PoeClient} from "poe-node-api";
-import dotenv from "dotenv";
+// Import packages
+const express = require('express');
+const {PoeClient} = require('poe-node-api');
 
-// Load .env file
-dotenv.config();
+// Create a client with cookie from poe.com
+const client = new PoeClient({logLevel: 'debug', cookie: process.env.cookie});
 
-// Create Express app
+// Create a web server
 const app = express();
 
-// Create PoeClient instance
-const client = new PoeClient({cookie: process.env.cookie});
+// Create a rate limiter
+const rateLimit = require('express-rate-limit');
+const limiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 10, // limit each IP to 10 requests per windowMs
+  message: 'Too many requests, please wait a minute and try again'
+});
 
-// Create bot map
-const botMap = new Map([
-  ["normal", {nick: "a2", display: "Claude-instant"}],
-  ["standup", {nick: "beaver", display: "GPT-4"}],
-  ["cowboy", {nick: "capybara", display: "Sage"}]
-]);
+// Apply rate limiter to all requests
+app.use(limiter);
 
-// Create rate limit middleware
-let requestCount = 0;
-let startTime = Date.now();
-const rateLimit = (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  // Increment request count
-  requestCount++;
-  // Get current time
-  let currentTime = Date.now();
-  // Check if one minute has passed
-  if (currentTime - startTime >= 60000) {
-    // Reset request count and start time
-    requestCount = 0;
-    startTime = currentTime;
-  }
-  // Check if request count exceeds limit
-  if (requestCount > 10) {
-    // Send response with status code 429 and message
-    res.status(429).send("Too many requests. Please wait for one minute.");
-  } else {
-    // Call next function
-    next();
-  }
-};
+// Handle url parameters
+app.get('/', async (req, res) => {
+  // Get the query, id and mode from the url
+  const query = req.query.q;
+  const id = req.query.id;
+  const mode = req.query.mode;
 
-// Create API route
-app.get("/", rateLimit, async (req: express.Request, res: express.Response) => {
-  try {
-    // Get query parameters
-    const input = req.query.q as string;
-    const id = req.query.id as string;
-    const mode = req.query.mode as string;
-    // Print id to console
-    console.log(id);
-    // Get bot info from map
-    const botInfo = botMap.get(mode);
-    // Check if mode is valid
-    if (!botInfo) {
-      // Send response with status code 400 and message
-      res.status(400).send("Invalid mode. Please enter normal, standup, or cowboy.");
-      return;
-    }
-    // Initialize client
+  // Print the id to the console
+  console.log(id);
+
+  // Check if query and mode are valid
+  if (query && mode) {
+    // Initialize the client
     await client.init();
-    // Send message to bot and get response
-    await client.sendMessage(input, botInfo.nick, false, (result: string) => {
-      // Send response with status code 200 and JSON object
-      res.status(200).json({bot: botInfo.display, response: result});
-    });
-  } catch (error) {
-    // Send response with status code 500 and error message
-    res.status(500).send(error.message);
+
+    // Define a map of modes to bot nicknames
+    const modeMap = {
+      normal: 'a2',
+      standup: 'beaver',
+      cowboy: 'capybara'
+    };
+
+    // Get the bot nickname from the mode
+    const botNickName = modeMap[mode];
+
+    // Check if bot nickname is valid
+    if (botNickName) {
+      // Send message to bot and get response
+      await client.sendMessage(query, botNickName, false, (result) => {
+        // Send response as json
+        res.json({response: result});
+      });
+    } else {
+      // Send error message for invalid mode
+      res.json({error: 'Invalid mode'});
+    }
+  } else {
+    // Send error message for missing query or mode
+    res.json({error: 'Missing query or mode'});
   }
 });
 
-// Start server
+// Listen on port 3000
 app.listen(3000, () => {
-  console.log("Server is running on port 3000");
+  console.log('Server running on port 3000');
 });
