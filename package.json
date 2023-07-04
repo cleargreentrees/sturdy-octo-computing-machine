@@ -9,6 +9,6 @@
   "dependencies": {
     "express": "^4.17.1",
     "express-rate-limit": "^5.5.1",
-    "poe-node-api": "^1.0.2"
+    "poe-node-api": "https://github.com/AHGGG/poe-node-api.git"
   }
 }
