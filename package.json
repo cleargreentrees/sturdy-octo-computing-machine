@@ -4,8 +4,7 @@
   "description": "An example of using poe-node-api to create a web server",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-      "build": "npm install --production"
+    "start": "node index.js"
   },
   "dependencies": {
     "express": "^4.17.1",
